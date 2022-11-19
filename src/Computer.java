@@ -2,6 +2,7 @@
 import javax.crypto.KeyGenerator;
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -21,7 +22,25 @@ public final class Computer {
                 Computer.algorithm = getAlgorithm();
                 System.out.println("Для шифровки был выбран алгоритм: " + Computer.algorithm);
                 Computer.kg = KeyGenerator.getInstance(Computer.algorithm);
-                Computer.kg.init(new Random().nextInt(16) + 40);
+                Random rand = new Random();
+                if (rand.nextBoolean()) {
+                    Computer.key = convertByteToSecretKey(new byte[]{
+                            (byte) (rand.nextInt(10) - 5),
+                            (byte) (rand.nextInt(10) - 5),
+                            (byte) (rand.nextInt(10) - 5),
+                            (byte) (rand.nextInt(10) - 5),
+                            (byte) (rand.nextInt(10) - 5),
+                    }, Computer.algorithm);
+                } else {
+                    Computer.key = convertByteToSecretKey(new byte[]{
+                            (byte) (rand.nextInt(10) - 5),
+                            (byte) (rand.nextInt(10) - 5),
+                            (byte) (rand.nextInt(10) - 5),
+                            (byte) (rand.nextInt(10) - 5),
+                            (byte) (rand.nextInt(10) - 5),
+                            (byte) (rand.nextInt(10) - 5),
+                    }, Computer.algorithm);
+                }
                 Computer.key = Computer.kg.generateKey();
             }
             this.mac = Mac.getInstance(Computer.algorithm);
@@ -29,6 +48,10 @@ public final class Computer {
         } catch (NoSuchAlgorithmException | InvalidKeyException e) {
             throw new RuntimeException("Ты вот зачем в код полез, вот и получай теперь");
         }
+    }
+
+    public static SecretKey convertByteToSecretKey(byte[] key, String algorithm) {
+        return new SecretKeySpec(key, 0, key.length, algorithm);
     }
 
     public SendBox sendBox(String message) {
